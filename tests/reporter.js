@@ -1,7 +1,7 @@
 'use strict';
 
 var EmojiInfoService = {
-  URL: '../node_modules/emoji-table/dist/emoji.json',
+  URL: '../node_modules/emojibase-data/en/data.json',
   map: null,
 
   _initPromise: null,
@@ -19,16 +19,49 @@ var EmojiInfoService = {
         this.map = new Map();
 
         if (!json) {
-          console.warn('EmojiInfoService: Failed to load table.');
+          console.warn('EmojiInfoService: Failed to load data.');
           return;
         };
         for (var info of json) {
-          this.map.set(info.code, info);
+          if (info.skins) {
+            this._flattenSkins(info);
+          }
+          this.map.set(info.hexcode, info);
         }
+        this._augmentInfo();
       }.bind(this));
 
     this._initPromise = p;
     return p;
+  },
+
+  _flattenSkins: function(emoji) {
+    for (var skin of emoji.skins) {
+      skin.tags = emoji.tags;
+      this.map.set(skin.hexcode, skin);
+    }
+    emoji.skins = undefined;
+  },
+
+  _augmentInfo: function() {
+    // Regional Indicator Symbol Letters
+    for (var i = 127462; i <= 127487; ++i) {
+      // '1F1E6' <= && <= '1F1FF'
+      // RISLs are offset from their plain ascii cousins by 127397
+      var letter = String.fromCodePoint(i - 127397);
+      var hexcode = i.toString(16).toUpperCase();
+      this.map.set(hexcode, {
+        annotation: 'regional indicator symbol letter ' + letter,
+        tags: ['regional', 'letter', letter],
+        hexcode,
+      });
+    }
+    // Non-standard
+    this.map.set('E50A', {
+      annotation: 'shibuya',
+      tags: ['private use area', 'non-standard'],
+      hexcode: 'E50A',
+    });
   },
 
   getInfo: function(codePoints) {
@@ -42,17 +75,15 @@ var EmojiInfoService = {
         while (str.length < 4) {
           str = '0' + str;
         }
-        return 'U+' + str;
+        return str;
       });
 
-      var i = codePoints.length;
-      do {
-        var str = codePointsStrArr.slice(0, i).join(' ');
-        var info = this.map.get(str);
-        if (info) {
-          return info;
-        }
-      } while (--i);
+
+      var str = codePointsStrArr.join('-');
+      var info = this.map.get(str);
+      if (info) {
+        return info;
+      }
 
       return null;
     }.bind(this));
@@ -207,6 +238,8 @@ TestReport.prototype = {
   // Set this to true to get rip of the canvases and other bits that would
   // cause out of memory error in Windows XP
   MINIMAL_REPORT: false,
+  // Only keep failure canvases to reduce memory. Overridden by MINIMAL_REPORT.
+  FAILURE_ONLY: true,
 
   render: function(canExpend) {
     var result = this.result;
@@ -244,11 +277,11 @@ TestReport.prototype = {
     EmojiInfoService.getInfo(result.codePoints)
       .then(function(info) {
         if (!info) {
-          infoEl.parentNode.removeChild(infoEl);
+          infoEl.textContent = 'tags: non-standard';
           return;
         }
         infoEl.textContent =
-          info.name + '. tags: ' + info.tags.join(', ') + '.';
+          info.annotation + '. tags: ' + info.tags.join(', ') + '. version: ' + info.version;
       })
       .catch(function(e) { console.error(e); });
     reportEl.appendChild(infoEl);
@@ -259,7 +292,7 @@ TestReport.prototype = {
       reportEl.classList.add('failed');
     }
 
-    if (!this.MINIMAL_REPORT) {
+    if (!this.MINIMAL_REPORT && (!this.passed || !this.FAILURE_ONLY)) {
       reportTitleEl.addEventListener('click', this);
       reportTitleEl.classList.add('clickable');
       infoEl.addEventListener('click', this);
@@ -276,7 +309,7 @@ TestReport.prototype = {
   },
 
   minimizeMemoryUsage: function() {
-    if (this.MINIMAL_REPORT) {
+    if (this.MINIMAL_REPORT || (this.passed && this.FAILURE_ONLY)) {
       // Throw away the reference to the test result -- everything
       // we need is printed on the DOM already.
       this.result = null;
