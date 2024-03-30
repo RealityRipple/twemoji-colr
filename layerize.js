@@ -18,6 +18,9 @@ if (fontName === undefined) {
 // Extra ligature rules to support ZWJ sequences that already exist as individual characters
 var extraLigatures = JSON.parse(fs.readFileSync(extrasDir + "/ligatures.json"));
 
+// partially qualified and unqualified sequences
+var hexcodes = JSON.parse(fs.readFileSync(`./node_modules/emojibase-data/meta/hexcodes.json`));
+
 var components = {};
 // maps svg-data -> glyphName
 
@@ -373,19 +376,45 @@ function recordGradient(g, urlColor) {
     urlColor[id] = color;
 }
 
-function processFile(fileName, data) {
+function processFile(fileName, data, withAliases = true) {
     // strip .svg extension off the name
     var baseName = fileName.replace(".svg", "");
-    // Twitter doesn't include the VS16 in the keycap filenames
-    if (/^[23][0-9a]-20e3$/.test(baseName)) {
-        var orig = baseName;
-        baseName = baseName.replace('-20e3', '-fe0f-20e3');
-        console.log(`found mis-named keycap ${orig}, renamed to ${baseName}`);
-    } else if (baseName === '1f441-200d-1f5e8') {
-        // ...or in the "eye in speech bubble"'s
-        baseName = '1f441-fe0f-200d-1f5e8-fe0f';
-        console.log(`found mis-named 1f441-200d-1f5e8, renamed to ${baseName}`);
+    if (withAliases) {
+        // Twitter doesn't include the VS16 in the keycap filenames
+        if (/^[23][0-9a]-20e3$/.test(baseName)) {
+            var orig = baseName;
+            baseName = baseName.replace('-20e3', '-fe0f-20e3');
+            console.log(`found mis-named keycap ${orig}, renamed to ${baseName}`);
+        } else if (baseName === '1f441-200d-1f5e8') {
+            // ...or in the "eye in speech bubble"'s
+            baseName = '1f441-fe0f-200d-1f5e8-fe0f';
+            console.log(`found mis-named 1f441-200d-1f5e8, renamed to ${baseName}`);
+        }
+
+        // make duplicate entries for all aliases
+        // this includes both partially-qualified and unqualified
+        var codePt = baseName.toUpperCase();
+        while (codePt.length < 4 || (codePt.indexOf('-') > -1 && codePt.indexOf('-') < 4))
+            codePt = '0' + codePt;
+        if (hexcodes.hasOwnProperty(codePt)) {
+            for (var alias in hexcodes[codePt]) {
+                if (!hexcodes[codePt].hasOwnProperty(alias))
+                    continue;
+                if (alias.slice(-5) === '-FE0E')
+                    continue;
+                if (alias === codePt)
+                    continue;
+                var aFile = alias.toLowerCase();
+                while (aFile.slice(0, 1) === '0')
+                    aFile = aFile.slice(1);
+                processFile(aFile + '.svg', data, false);
+            }
+        }
     }
+
+    // skip (C), (R), (TM), and (M) characters, but not their aliases
+    if (baseName === 'a9' || baseName === 'ae' || baseName === '2122' || baseName === '24c2')
+        return;
 
     var parser = new xml2js.Parser({
         preserveChildrenOrder: true,
