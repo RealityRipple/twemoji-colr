@@ -1,12 +1,15 @@
 {
   "name": "twemoji-colr",
   "description": "Twemoji font in COLR/CPAL layered format.",
-  "version": "0.5.1",
+  "version": "0.7.0",
   "license": "Apache-2.0",
   "author": "Jonathan Kew <jfkthame@gmail.com>",
   "contributors": [
     "Tim Guan-tin Chien <timdream@gmail.com>",
-    "Essem <smswessem@gmail.com>"
+    "Essem <smswessem@gmail.com>",
+    "Gregory <https://github.com/GrSto>",
+    "Tilman Vatteroth <git@tilmanvatteroth.de>",
+    "Lim Chunwei <https://github.com/win98se>"
   ],
   "bugs": {
     "url": "https://github.com/mozilla/twemoji-colr/issues"
@@ -16,14 +19,14 @@
     "url": "git+https://github.com/mozilla/twemoji-colr.git"
   },
   "dependencies": {
-    "grunt": "^1.0.2",
-    "grunt-cli": "^1.2.0",
-    "grunt-webfont": "^1.6.0",
-    "load-grunt-tasks": "^3.5.2",
+    "grunt": "^1.4.1",
+    "grunt-cli": "^1.4.3",
+    "grunt-webfonts": "^4.0.2",
+    "load-grunt-tasks": "^5.1.0",
     "rmdir": "^1.2.0",
     "unzip": "^0.1.11",
-    "xml2js": "^0.4.19",
-    "xmlbuilder": "^8.2.2"
+    "xml2js": "^0.4.23",
+    "xmlbuilder": "^15.1.1"
   },
   "keywords": [
     "emoji",
@@ -33,10 +36,13 @@
   ],
   "homepage": "https://github.com/mozilla/twemoji-colr#readme",
   "devDependencies": {
-    "emojibase-data": "^4.2.1",
-    "resemblejs": "^2.10.0"
+    "emojibase-data": "^7.0.1",
+    "resemblejs": "^4.1.0"
   },
   "scripts": {
     "grunt": "grunt"
+  },
+  "resolutions": {
+    "graceful-fs": "^4.2.9"
   }
 }
