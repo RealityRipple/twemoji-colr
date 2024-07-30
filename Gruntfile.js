@@ -16,6 +16,7 @@ module.exports = function (grunt) {
                     engine: 'fontforge',
                     types: 'ttf',
                     autoHint: false,
+                    zerowidth: ['20e3'],
                     execMaxBuffer: 1024 * 1000,
                     version: packageJSON.version,
                     codepointsFile: 'build/codepoints.js'
@@ -24,6 +25,6 @@ module.exports = function (grunt) {
         },
     });
 
-    grunt.loadNpmTasks('grunt-webfonts');
+    grunt.loadNpmTasks('grunt-webfonts-zwc');
     grunt.registerTask('default', ['webfont']);
 };
