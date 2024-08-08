@@ -1,7 +1,7 @@
 {
   "name": "twemoji-colr",
   "description": "Twemoji font in COLR/CPAL layered format.",
-  "version": "15.1.1",
+  "version": "15.1.2",
   "license": "Apache-2.0",
   "author": "Jonathan Kew <jfkthame@gmail.com>",
   "contributors": [
