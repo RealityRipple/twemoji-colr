@@ -25,6 +25,6 @@ module.exports = function (grunt) {
         },
     });
 
-    grunt.loadNpmTasks('grunt-webfonts-zwc');
+    grunt.loadNpmTasks('grunt-webfonts');
     grunt.registerTask('default', ['webfont']);
 };
