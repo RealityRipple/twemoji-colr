@@ -1,7 +1,7 @@
 {
   "name": "twemoji-colr",
   "description": "Twemoji font in COLR/CPAL layered format.",
-  "version": "15.1.3",
+  "version": "16.0.0",
   "license": "Apache-2.0",
   "author": "Jonathan Kew <jfkthame@gmail.com>",
   "contributors": [
@@ -19,7 +19,7 @@
     "url": "git+https://github.com/mozilla/twemoji-colr.git"
   },
   "dependencies": {
-    "emojibase-data": "^15.3.0",
+    "emojibase-data": "^16.0.3",
     "grunt": "^1.6.1",
     "grunt-cli": "^1.4.3",
     "grunt-webfonts": "^5.1.0",
